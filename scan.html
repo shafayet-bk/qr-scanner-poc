@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Scanner POC</title>
   </head>
   <body>
@@ -65,7 +66,7 @@
       async function updateFlashAvailability() {
         console.log("Updating Flash Availability");
         let hasFlash = await scanner.hasFlash();
-        flashToggle.disabled = !hasFlash;
+        // flashToggle.disabled = !hasFlash;
         console.log("Flash Availability Updated");
       }
 
