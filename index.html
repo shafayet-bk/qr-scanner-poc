@@ -2,12 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QR Scanner POC</title>
   </head>
   <body>
     <h1>QR Scan POC by Shafayet</h1>
-    <div>Last results: <span id="lastResultsDiv"></span></div>
+    <div style="font-size: 24px">
+      Last results: <span style="font-weight: bold" id="lastResultsDiv"></span>
+    </div>
     <button id="start-button">Initiate Scanning</button>
 
     <script type="module">
@@ -29,6 +31,10 @@
     <style>
       div {
         margin-bottom: 16px;
+      }
+
+      button {
+        font-size: 20px;
       }
     </style>
   </body>
