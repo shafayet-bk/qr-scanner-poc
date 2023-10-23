@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>QR Scanner POC</title>
+  </head>
+  <body>
+    <h1>QR Scan POC by Shafayet</h1>
+    <div id="video-container">
+      <video id="qr-video"></video>
+    </div>
+
+    <button id="stop-button">Exit Scanner</button>
+
+    <button id="toggle-camera-button">Toggle Camera</button>
+
+    <button id="toggle-flash-button">Toggle Flash</button>
+
+    <hr />
+
+    <br />
+    <b>Detected QR code: </b>
+    <span id="cam-qr-result">None</span>
+    <br />
+    <b>Last detected at: </b>
+    <span id="cam-qr-result-timestamp"></span>
+
+    <script type="module">
+      import QrScanner from "./qr-scanner.min.js";
+
+      const video = document.getElementById("qr-video");
+      const videoContainer = document.getElementById("video-container");
+      const flashToggle = document.getElementById("toggle-flash-button");
+      const cameraToggle = document.getElementById("toggle-camera-button");
+      const camQrResult = document.getElementById("cam-qr-result");
+      const camQrResultTimestamp = document.getElementById(
+        "cam-qr-result-timestamp"
+      );
+
+      function setResult(result) {
+        console.log(result.data);
+        camQrResult.textContent = result.data;
+        camQrResultTimestamp.textContent = new Date().toString();
+        camQrResult.style.color = "teal";
+        clearTimeout(camQrResult.highlightTimeout);
+        camQrResult.highlightTimeout = setTimeout(
+          () => (camQrResult.style.color = "inherit"),
+          100
+        );
+      }
+
+      let scanner = null;
+      let cameraList = [];
+      let currentCameraIndex = 0; // This is uncertain
+
+      async function decodeErrorHandler(error) {
+        camQrResult.textContent = error;
+        camQrResult.style.color = "inherit";
+      }
+
+      async function successHandler(result) {
+        setResult(result);
+      }
+
+      async function updateFlashAvailability() {
+        console.log("Updating Flash Availability");
+        let hasFlash = await scanner.hasFlash();
+        flashToggle.disabled = !hasFlash;
+        console.log("Flash Availability Updated");
+      }
+
+      async function updateCameraToggleability() {
+        console.log("Updating Camera Toggleability");
+        cameraToggle.disabled = cameraList.length < 2;
+        console.log("Camera Toggleability Updated");
+      }
+
+      async function initiateScanning() {
+        console.log("Querying Camera Availability");
+        let hasAtLeastOneCamera = await QrScanner.hasCamera();
+        console.log({ hasAtLeastOneCamera });
+
+        if (!hasAtLeastOneCamera) {
+          alert("No camera detected. Ending scanning.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        // set up the scanner
+        console.log("Setting up the Scanner");
+        scanner = new QrScanner(video, successHandler, {
+          onDecodeError: decodeErrorHandler,
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+        });
+
+        // start scanner
+        console.log("Starting the scanner");
+        await scanner.start();
+        console.log("Scanner started");
+
+        // populate flash related information
+        await updateFlashAvailability();
+
+        // list all cameras for looping / toggling
+        console.log("Listing all cameras");
+        cameraList = await QrScanner.listCameras(true);
+        console.log({ cameraList });
+        console.log("All cameras Listed");
+
+        await updateCameraToggleability();
+      }
+
+      cameraToggle.addEventListener("click", async () => {
+        currentCameraIndex += 1;
+        if (currentCameraIndex >= cameraList.length) {
+          currentCameraIndex = 0;
+        }
+        console.log(currentCameraIndex);
+
+        let camera = cameraList[currentCameraIndex];
+        console.log("Setting camera: ", camera);
+
+        await scanner.setCamera(camera.id);
+        await updateCameraToggleability();
+      });
+
+      flashToggle.addEventListener("click", async () => {
+        console.log("Toggling flash");
+        await scanner.toggleFlash();
+        console.log("Toggled flash");
+      });
+
+      document.getElementById("stop-button").addEventListener("click", () => {
+        scanner.stop();
+        window.location.href = "index.html";
+      });
+
+      initiateScanning()
+        .then(() => "pass")
+        .catch((ex) => {
+          console.error(ex);
+          alert("Fatal error. Please check logs.");
+        });
+    </script>
+
+    <style>
+      #qr-video {
+        max-width: 400px;
+      }
+      div {
+        margin-bottom: 16px;
+      }
+
+      #video-container {
+        line-height: 0;
+      }
+
+      hr {
+        margin-top: 32px;
+      }
+    </style>
+  </body>
+</html>
