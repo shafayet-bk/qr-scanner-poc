@@ -6,7 +6,7 @@
     <title>QR Scanner POC</title>
   </head>
   <body>
-    <h1>QR Scan POC by Shafayet</h1>
+    <h1>QR Scan POC by Shafayet <sub>b12</sub></h1>
     <div id="video-container">
       <video id="qr-video"></video>
     </div>
@@ -71,12 +71,12 @@
             parts[2] !== "END" ||
             parts[1].length < 4
           ) {
-            alert("Not a valid BB Order Code");
+            decodeErrorHandler("Not a valid BB Order Code");
             return;
           }
           let bbOrderCode = parts[1];
 
-          alert("BB Order Code: " + bbOrderCode);
+          console.log("BB Order Code: " + bbOrderCode);
           await scanner.stop();
 
           window.location.href = `index.html?res=${bbOrderCode}`;
@@ -176,6 +176,7 @@
     <style>
       #qr-video {
         max-width: min(90vw, 400px);
+        max-height: 60vh;
       }
       div {
         margin-bottom: 16px;
